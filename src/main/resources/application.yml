@@ -1,0 +1,25 @@
+sys:
+  uploadPath: /root/attach
+server:
+  port: 443
+  ssl:
+    key-store: fullmusic.club.jks
+    key-password: tomcat123
+    key-alias: tomcat
+    key-store-type: JKS
+spring:
+  resources:
+    static-locations: file:/root/attach
+  datasource:
+    url: jdbc:mysql://94.191.15.204:3306/fullmusic
+    username: root
+    password: mmali159753
+    driverClassName: com.mysql.jdbc.Driver
+  servlet:
+    multipart:
+      enabled: true
+      file-size-threshold: 0
+      max-file-size: 200MB
+      max-request-size: 200MB
+mybatis:
+  mapper-locations: classpath*:mapper/*.xml
