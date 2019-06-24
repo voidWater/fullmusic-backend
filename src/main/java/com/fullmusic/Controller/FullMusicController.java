@@ -43,6 +43,16 @@ public class FullMusicController {
     public ResponseResult test(){
         return ResponseResult.createMsg(12,"234234324");
     }
+
+    /**
+     * websocket test
+     * @return
+     */
+    @RequestMapping("websocketTest")
+    public ResponseResult webSocketTest(){
+        FullMusicWebSocket.onMessage("mmp");
+        return ResponseResult.createMsg(12,"234234324");
+    }
     /**
      * 没有注册
      * @return
@@ -85,8 +95,9 @@ public class FullMusicController {
      * @return
      */
     @RequestMapping("login")
-    public ResponseResult Login(String userId, HttpSession session){
+    public ResponseResult Login(String userId,String icon, HttpSession session){
         User user = fullMusicService.getUser(userId);
+        fullMusicService.saveIcon(userId,icon);
         if(user!=null){
             return ResponseResult.createMsg(SysParam.LoginStatus.YES.getCode(),SysParam.LoginStatus.YES.getMsg());
         }else{
@@ -102,7 +113,7 @@ public class FullMusicController {
      */
     public ResponseResult ClockInByWord(HttpSession session,String content){
         User user = (User)session.getAttribute("user");
-        if(fullMusicService.ClockInByWord(user.getId(),content)==1){
+        if(fullMusicService.clockInByWord(user.getId(),content)==1){
             return ResponseResult.createMsg(SysParam.Clockin.SUCCESS.getCode(),SysParam.Clockin.SUCCESS.getMsg());
         }else{
             return ResponseResult.createMsg(SysParam.Clockin.ERROR.getCode(),SysParam.Clockin.ERROR.getMsg());
@@ -138,12 +149,12 @@ public class FullMusicController {
     /**
      *打卡
      * @param userId
-     * @param context
+     * @param content
      * @param file
      * @return
      */
     @PostMapping("clock")
-    public ResponseResult clockContext(String userId,String context,@RequestParam(value = "file", required = false) MultipartFile file){
+    public ResponseResult clockContext(String userId,String content,@RequestParam(value = "file", required = false) MultipartFile file){
         try {
             if (file.isEmpty()) {
                 return ResponseResult.createMsg(-1,"文件为空");
@@ -153,7 +164,6 @@ public class FullMusicController {
             // 获取文件的后缀名
             String suffixName = fileName.substring(fileName.lastIndexOf("."));
             // 设置文件存储路径
-            String filePath = "/Users/dalaoyang/Downloads/";
             String path = uploadPath + fileName;
             File dest = new File(path);
             // 检测是否存在目录
@@ -161,6 +171,7 @@ public class FullMusicController {
                 dest.getParentFile().mkdirs();// 新建文件夹
             }
             file.transferTo(dest);// 文件写入
+            fullMusicService.clockInByVideo(userId,content,path);
             return ResponseResult.createMsg(0,"上传成功");
         } catch (IllegalStateException e) {
             e.printStackTrace();

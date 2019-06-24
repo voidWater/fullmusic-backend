@@ -1,12 +1,8 @@
 sys:
   uploadPath: /root/attach
 server:
-  port: 443
-  ssl:
-    key-store: fullmusic.club.jks
-    key-password: tomcat123
-    key-alias: tomcat
-    key-store-type: JKS
+  port: 444
+
 spring:
   resources:
     static-locations: file:/root/attach

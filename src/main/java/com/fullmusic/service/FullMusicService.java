@@ -1,5 +1,6 @@
 package com.fullmusic.service;
 
+import com.fullmusic.Controller.FullMusicWebSocket;
 import com.fullmusic.common.ResponseResult;
 import com.fullmusic.common.SysParam;
 import com.fullmusic.dao.ClockInMapper;
@@ -65,7 +66,7 @@ public class FullMusicService {
      * @param content
      * @return
      */
-    public int ClockInByWord(String userid, String content) {
+    public int clockInByWord(String userid, String content) {
         ClockIn ci = new ClockIn();
         ci.setId(UUID.randomUUID().toString());
         ci.setVcContent(content);
@@ -75,6 +76,38 @@ public class FullMusicService {
         ci.setVcUpdatedate(new Date());
         ci.setVcCreatedate(new Date());
         return clockInMapper.insert(ci);
+    }
+
+    /**
+     * 视频打卡
+     * @param userid
+     * @param content
+     * @param resourcePath
+     * @return
+     */
+    public int clockInByVideo(String userid, String content,String resourcePath) {
+        ClockIn ci = new ClockIn();
+        ci.setId(UUID.randomUUID().toString());
+        ci.setVcContent(content);
+        ci.setVcUserId(userid);
+        ci.setVcType(SysParam.Clockin.TYPE_VIDEO.getCode());
+        ci.setVcInvalid(0);
+        ci.setVcUpdatedate(new Date());
+        ci.setVcCreatedate(new Date());
+        ci.setVcResourceUrl(resourcePath);
+        return clockInMapper.insert(ci);
+    }
+
+
+    /**
+     * 更新icon
+     * @param userId
+     * @param icon
+     */
+    public void saveIcon(String userId,String icon) {
+        User user = userMapper.selectByPrimaryKey(userId);
+        user.setVcAddr(icon);
+        userMapper.updateByPrimaryKey(user);
     }
 
     /**
@@ -94,7 +127,12 @@ public class FullMusicService {
         talk.setVcInvalid(0);
         talk.setVcCreatedate(new Date());
         talk.setVcUpdatedate(new Date());
-        return talkMapper.insert(talk);
+        if(talkMapper.insert(talk)==1){
+            FullMusicWebSocket.onMessage(talk.getId());
+            return 1;
+        }else {
+            return 0;
+        }
     }
 
     /**
@@ -112,4 +150,5 @@ public class FullMusicService {
         List<ClockIn> list= clockInMapper.selectByExample(clockInExample);
         return ResponseResult.createList(0,"success",list.size(),list);
     }
+
 }
